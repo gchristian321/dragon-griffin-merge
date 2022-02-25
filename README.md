@@ -42,13 +42,13 @@ Running the command above creates two ROOT files in the current directory:
 fragment*.root
 analysis*.root
 ```
-(again * is the run number). Ensure to move them to an appropriate directory for long-term data storage.
+(again * is the run number). Ensure to move them to an appropriate directory for long-term data storage. You will need to use the `analysis*.root` file in subsequent steps (as input to `dragon-griffin-merge`). The fragment file is not used in the merging program.
 
 To create the DRAGON ROOT file from an original MIDAS file, do the following:
 ```
 mid2root /path/to/run*.mid -o /path/to/run*.root
 ```
-This creates the ROOT file run*.root in the specified path.
+This creates the ROOT file run*.root in the specified path. This will be your DRAGON input to `dragon-griffin-merge`.
 
 ### Running the code
 To run the merging code, do:
