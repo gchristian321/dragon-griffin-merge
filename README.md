@@ -79,4 +79,4 @@ AnalysisTree->AddFriend(t3);
 ```
 (or t5, depending on which option was used for the DRAGON tree).
 
-After doing this, events fro either GRIFFIN or DRAGON can be accessed as they normally would.
+After doing this, events from either GRIFFIN or DRAGON can be accessed as they normally would.
