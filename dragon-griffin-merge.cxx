@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	}
 
 	if(grifFile == "" || dragFile == "" || outFile == "") {
-		cerr << "usage: dragon-griffin-merge <dragon file> <griffin file> <output file> [--t3]\n";
+		cerr << "usage: dragon-griffin-merge <dragon file> <griffin file> <output file> [--t3] [--match-window=<match window>]\n";
 		return 1;
 	}
 
