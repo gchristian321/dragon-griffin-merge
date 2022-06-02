@@ -5,8 +5,7 @@
 #include <algorithm>
 #include "TFile.h"
 #include "TTree.h"
-#include "TGenericDetector.h"
-#include "TDetector.h"
+#include "TGriffin.h"
 #include "Dragon.hxx"
 using namespace std;
 
@@ -67,11 +66,11 @@ int main(int argc, char** argv)
 	long analentries = AnalysisTree->GetEntries();
 	const char * testval = "NULL";
 
-	TGenericDetector * grif_data = 0;
-	if (AnalysisTree->FindBranch("TGenericDetector")) {
-		AnalysisTree->SetBranchAddress("TGenericDetector", & grif_data);
+	TGriffin * grif_data = 0;
+	if (AnalysisTree->FindBranch("TGriffin")) {
+		AnalysisTree->SetBranchAddress("TGriffin", & grif_data);
 	} else {
-		cerr << "Branch 'TGenericDetector' not found! TGenericDetector variable is NULL pointer" << endl;
+		cerr << "Branch 'TGriffin' not found! TGriffin variable is NULL pointer" << endl;
 		return 1;
 	}
 
@@ -82,25 +81,18 @@ int main(int argc, char** argv)
 	grifVector.reserve(analentries);
 	for (Long64_t jentry = 0; jentry < analentries; jentry++) { // loop over events in analysis tree
 		AnalysisTree->GetEntry(jentry);
-		if(grif_data && grif_data->GetMultiplicity() > 0) {
-			const double tstamp = grif_data->GetHit(0)->GetTimeStampNs() * us_GRIFFIN;
-			
-			grifVector.push_back(make_tuple(tstamp, jentry));
+		const auto grifMult = grif_data->GetMultiplicity();
+		if(grif_data && grifMult > 0) {
 
-			// auto it = grifMap.emplace(tstamp, jentry);
-			// if(it.second == false) {
-			// 	cerr << "WARNING: two griffin entries inside the match window. Keeping ONLY the earlier one...\n";
-			// 	fprintf(stderr, "TIMESTAMP (1): %.12g; (2): %.12g; (DIFF): %.12g\n",
-			// 					min(it.first->first, tstamp),  max(it.first->first, tstamp), fabs(it.first->first-tstamp));
-			// 	if(it.first->first > tstamp) {
-			// 		grifMap.erase(it.first);
-			// 		auto it2 = grifMap.emplace(tstamp, jentry);
-			// 		if(it2.second == false) {
-			// 			throw runtime_error("Griffin insertion error.");
-			// 		}
-			// 	}
-		// }
-		}
+			// set timestamp to time of the earliest hit
+			vector<double> ts_hits(grifMult);
+			for(size_t jhit = 0; jhit< grifMult; ++jhit) {				
+				const double tstamp = grif_data->GetHit(jhit)->GetTimeStampNs() * us_GRIFFIN;
+				ts_hits[jhit] = tstamp;
+			}
+			const double tstamp_min = TMath::MinElement(ts_hits.size(), &ts_hits[0]);
+			grifVector.push_back(make_tuple(tstamp_min, jentry));
+ 		}
 	}
 
 	sort(grifVector.begin(), grifVector.end(),
@@ -130,7 +122,7 @@ int main(int argc, char** argv)
 	// Outputs
 	TFile* fout = new TFile(outFile,"recreate");
 	TTree* GriffinOutTree = new TTree(AnalysisTree->GetName(), AnalysisTree->GetTitle());
-	GriffinOutTree->Branch("TGenericDetector", "TGenericDetector", & grif_data);
+	GriffinOutTree->Branch("TGriffin", "TGriffin", & grif_data);
 
 	TTree* DragonOutTree = new TTree(DragonTree->GetName(), DragonTree->GetTitle());
 	if(use_t3) { DragonOutTree->Branch("tail", "dragon::Tail", &b_tail); }
